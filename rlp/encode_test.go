@@ -266,6 +266,7 @@ func runEncTests(t *testing.T, f func(val interface{}) ([]byte, error)) {
 			t.Errorf("test %d: output mismatch:\ngot   %X\nwant  %s\nvalue %#v\ntype  %T",
 				i, output, test.output, test.val, test.val)
 		}
+		fmt.Println("==================", output)
 	}
 }
 

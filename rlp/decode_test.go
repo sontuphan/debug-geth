@@ -62,6 +62,10 @@ func TestStreamKind(t *testing.T) {
 		if len != test.wantLen {
 			t.Errorf("test %d: len mismatch: got %d, want %d", i, len, test.wantLen)
 		}
+		fmt.Println("================== test:", test)
+		fmt.Println("================== s:", s)
+		fmt.Println("================== kind:", kind)
+		fmt.Println("================== len:", len)
 	}
 }
 

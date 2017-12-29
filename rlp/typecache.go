@@ -59,6 +59,8 @@ type writer func(reflect.Value, *encbuf) error
 func cachedTypeInfo(typ reflect.Type, tags tags) (*typeinfo, error) {
 	typeCacheMutex.RLock()
 	info := typeCache[typekey{typ, tags}]
+	fmt.Println("TYPECACHE: cachedTypeInfo 0 typ/tags:", typ, tags)
+	fmt.Println("TYPECACHE: cachedTypeInfo 0 info: ", info)
 	typeCacheMutex.RUnlock()
 	if info != nil {
 		return info, nil
@@ -72,6 +74,8 @@ func cachedTypeInfo(typ reflect.Type, tags tags) (*typeinfo, error) {
 func cachedTypeInfo1(typ reflect.Type, tags tags) (*typeinfo, error) {
 	key := typekey{typ, tags}
 	info := typeCache[key]
+	fmt.Println("TYPECACHE: cachedTypeInfo 1 typ/tags:", typ, tags)
+	fmt.Println("TYPECACHE: cachedTypeInfo 1 info: ", info)
 	if info != nil {
 		// another goroutine got the write lock first
 		return info, nil
@@ -86,6 +90,8 @@ func cachedTypeInfo1(typ reflect.Type, tags tags) (*typeinfo, error) {
 		delete(typeCache, key)
 		return nil, err
 	}
+	fmt.Println("TYPECACHE: cachedTypeInfo 1 *typeCache[key]:", *typeCache[key])
+	fmt.Println("TYPECACHE: cachedTypeInfo 1 *info: ", *info)
 	*typeCache[key] = *info
 	return typeCache[key], err
 }
@@ -142,12 +148,15 @@ func parseStructTag(typ reflect.Type, fi int) (tags, error) {
 
 func genTypeInfo(typ reflect.Type, tags tags) (info *typeinfo, err error) {
 	info = new(typeinfo)
+	fmt.Println("TYPECACHE: genTypeInfo.decoder")
 	if info.decoder, err = makeDecoder(typ, tags); err != nil {
 		return nil, err
 	}
+	fmt.Println("TYPECACHE: genTypeInfo.writer")
 	if info.writer, err = makeWriter(typ, tags); err != nil {
 		return nil, err
 	}
+	fmt.Println("TYPECACHE: genTypeInfo.finale")
 	return info, nil
 }
 
