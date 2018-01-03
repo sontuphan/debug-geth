@@ -956,8 +956,8 @@ func (s *Stream) Kind() (kind Kind, size uint64, err error) {
 }
 
 func (s *Stream) readKind() (kind Kind, size uint64, err error) {
-	fmt.Println("DECODE: Stream.readKind")
 	b, err := s.readByte()
+	fmt.Println("DECODE: Stream.readKind b:", b)
 	if err != nil {
 		if len(s.stack) == 0 {
 			// At toplevel, Adjust the error to actual EOF. io.EOF is
@@ -974,17 +974,20 @@ func (s *Stream) readKind() (kind Kind, size uint64, err error) {
 	s.byteval = 0
 	switch {
 	case b < 0x80:
+		fmt.Println("DECODE: Stream.readKind case: < 0x80")
 		// For a single byte whose value is in the [0x00, 0x7F] range, that byte
 		// is its own RLP encoding.
 		s.byteval = b
 		return Byte, 0, nil
 	case b < 0xB8:
+		fmt.Println("DECODE: Stream.readKind case: < 0xB8")
 		// Otherwise, if a string is 0-55 bytes long,
 		// the RLP encoding consists of a single byte with value 0x80 plus the
 		// length of the string followed by the string. The range of the first
 		// byte is thus [0x80, 0xB7].
 		return String, uint64(b - 0x80), nil
 	case b < 0xC0:
+		fmt.Println("DECODE: Stream.readKind case: < 0xC0")
 		// If a string is more than 55 bytes long, the
 		// RLP encoding consists of a single byte with value 0xB7 plus the length
 		// of the length of the string in binary form, followed by the length of
@@ -997,6 +1000,7 @@ func (s *Stream) readKind() (kind Kind, size uint64, err error) {
 		}
 		return String, size, err
 	case b < 0xF8:
+		fmt.Println("DECODE: Stream.readKind case: < 0xF8")
 		// If the total payload of a list
 		// (i.e. the combined length of all its items) is 0-55 bytes long, the
 		// RLP encoding consists of a single byte with value 0xC0 plus the length
@@ -1032,6 +1036,7 @@ func (s *Stream) readUint(size byte) (uint64, error) {
 		for i := 0; i < start; i++ {
 			s.uintbuf[i] = 0
 		}
+		fmt.Println("DECODE: Stream.readUint s.uintbuf:", s.uintbuf)
 		if err := s.readFull(s.uintbuf[start:]); err != nil {
 			return 0, err
 		}
@@ -1041,12 +1046,13 @@ func (s *Stream) readUint(size byte) (uint64, error) {
 			// ErrCanonInt in this case.
 			return 0, ErrCanonSize
 		}
+		fmt.Println("DECODE: Stream.readUint binary.BigEndian.Uint64(s.uintbuf):", binary.BigEndian.Uint64(s.uintbuf))
 		return binary.BigEndian.Uint64(s.uintbuf), nil
 	}
 }
 
 func (s *Stream) readFull(buf []byte) (err error) {
-	fmt.Println("DECODE: Stream.readFull")
+	fmt.Println("DECODE: Stream.readFull buf:", buf)
 	if err := s.willRead(uint64(len(buf))); err != nil {
 		return err
 	}
@@ -1055,6 +1061,7 @@ func (s *Stream) readFull(buf []byte) (err error) {
 		nn, err = s.r.Read(buf[n:])
 		n += nn
 	}
+	fmt.Println("DECODE: Stream.readFull nn/n:", nn, n)
 	if err == io.EOF {
 		err = io.ErrUnexpectedEOF
 	}

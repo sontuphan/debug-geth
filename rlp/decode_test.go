@@ -559,6 +559,9 @@ var decodeTests = []decodeTest{
 		ptr:   new(interface{}),
 		error: "rlp: element is larger than containing list",
 	},
+
+	// personal test
+	{input: "01", ptr: new(string), value: true},
 }
 
 func uintp(i uint) *uint { return &i }
@@ -586,6 +589,7 @@ func runTests(t *testing.T, decode func([]byte, interface{}) error) {
 			t.Errorf("test %d: value mismatch\ngot  %#v\nwant %#v\ndecoding into %T\ninput %q",
 				i, deref, test.value, test.ptr, test.input)
 		}
+		fmt.Println("====================== End")
 	}
 }
 

@@ -247,6 +247,9 @@ var encTests = []encTest{
 	{val: testEncoder{}, error: "rlp: game over: unadressable value of type rlp.testEncoder, EncodeRLP is pointer method"},
 	// verify the special case for []byte
 	{val: []byteEncoder{0, 1, 2, 3, 4}, output: "C5C0C0C0C0C0"},
+
+	// personal test
+	{val: "\x80", output: "00"},
 }
 
 func runEncTests(t *testing.T, f func(val interface{}) ([]byte, error)) {
