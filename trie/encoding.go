@@ -35,6 +35,14 @@ package trie
 // into the remaining bytes. Compact encoding is used for nodes stored on disk.
 
 func hexToCompact(hex []byte) []byte {
+
+	// BEGIN
+	// This block of code does Compact (hex-prefix) encoding as following table
+	// hex char    bits    |    node type partial    path length
+	// 0           0000    |    extension            even
+	// 1           0001    |    extension            odd
+	// 2           0010    |    terminating (leaf)   even
+	// 3           0011    |    terminating (leaf)   odd
 	terminator := byte(0)
 	if hasTerm(hex) {
 		terminator = 1
@@ -47,18 +55,30 @@ func hexToCompact(hex []byte) []byte {
 		buf[0] |= hex[0] // first nibble is contained in the first byte
 		hex = hex[1:]
 	}
+	// END
+
+	// The result of above code is that buf[0] will be HP enconding byte (if odd, it inlucdes
+	// a first byte of input) and hex will be the input without terminator (if odd, a first byte
+	// of it will be ove into buf[0])
+
+	// Move all the rest of hex to buf (big endian)
 	decodeNibbles(hex, buf[1:])
 	return buf
+	// buf now is HP encoding
 }
 
 func compactToHex(compact []byte) []byte {
+	// Parse every single element of input to a slide
 	base := keybytesToHex(compact)
 	base = base[:len(base)-1]
+
 	// apply terminator flag
 	if base[0] >= 2 {
 		base = append(base, 16)
 	}
+
 	// apply odd flag
+	// actually, remove the hex prefix by code block below
 	chop := 2 - base[0]&1
 	return base[chop:]
 }
@@ -90,6 +110,7 @@ func hexToKeybytes(hex []byte) []byte {
 
 func decodeNibbles(nibbles []byte, bytes []byte) {
 	for bi, ni := 0, 0; ni < len(nibbles); bi, ni = bi+1, ni+2 {
+		// Move a couple of nibble (a byte) to byte
 		bytes[bi] = nibbles[ni]<<4 | nibbles[ni+1]
 	}
 }
