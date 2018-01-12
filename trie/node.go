@@ -156,8 +156,10 @@ func decodeShort(hash, buf, elems []byte, cachegen uint16) (node, error) {
 }
 
 func decodeFull(hash, buf, elems []byte, cachegen uint16) (*fullNode, error) {
+	fmt.Println("NODE: decodeFull elems", elems)
 	n := &fullNode{flags: nodeFlag{hash: hash, gen: cachegen}}
 	for i := 0; i < 16; i++ {
+		fmt.Println("NODE: decodeFull i/elems", i, elems)
 		cld, rest, err := decodeRef(elems, cachegen)
 		if err != nil {
 			return n, wrapError(err, fmt.Sprintf("[%d]", i))
@@ -165,12 +167,14 @@ func decodeFull(hash, buf, elems []byte, cachegen uint16) (*fullNode, error) {
 		n.Children[i], elems = cld, rest
 	}
 	val, _, err := rlp.SplitString(elems)
+	fmt.Println("NODE: decodeFull val", val)
 	if err != nil {
 		return n, err
 	}
 	if len(val) > 0 {
 		n.Children[16] = append(valueNode{}, val...)
 	}
+	fmt.Println("=====================", n.Children[16])
 	return n, nil
 }
 
